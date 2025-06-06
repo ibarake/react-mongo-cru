@@ -1,0 +1,185 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Code Architecture & Standards
+
+## Frontend Architecture - Atomic Design
+
+### Component Structure
+- **Atoms**: Basic building blocks (buttons, inputs, labels, icons)
+  - Single responsibility principle
+  - No business logic, only UI logic
+  - Highly reusable across the application
+
+- **Molecules**: Simple combinations of atoms (search forms, navigation items)
+  - Can contain minimal state management
+  - Handle user interactions that affect only the molecule
+  - Should be context-independent
+
+- **Organisms**: Complex UI sections (headers, product grids, forms)
+  - Can manage significant state
+  - May connect to global state or APIs
+  - Represent distinct sections of an interface
+
+- **Templates**: Page-level layouts without real content
+  - Define structure and layout patterns
+  - Contain placeholders for dynamic content
+
+- **Pages**: Specific instances of templates with real content
+  - Handle route-specific logic
+  - Connect to data sources and state management
+
+### File Organization
+```
+src/
+├── components/
+│   ├── atoms/
+│   ├── molecules/
+│   ├── organisms/
+│   └── templates/
+├── pages/
+├── hooks/
+├── services/
+├── utils/
+└── types/
+```
+
+### Component Guidelines
+- Use TypeScript for type safety
+- Implement proper prop interfaces
+- Export components with clear naming conventions
+- Include JSDoc comments for complex components
+- Follow consistent naming: PascalCase for components, camelCase for functions
+
+## Backend Architecture - Repository Pattern
+
+### Layer Separation
+- **Controllers**: Handle HTTP requests/responses, input validation
+- **Services**: Business logic, data processing, external API calls
+- **Repositories**: Data access layer, database operations
+- **Models**: Data structures, schemas, type definitions
+- **Middleware**: Authentication, logging, error handling
+
+### Repository Pattern Implementation
+```typescript
+// Repository interface defines contract
+interface IUserRepository {
+  findById(id: string): Promise<User | null>
+  create(user: CreateUserDto): Promise<User>
+  update(id: string, data: UpdateUserDto): Promise<User>
+  delete(id: string): Promise<boolean>
+}
+
+// Concrete implementation handles database specifics
+class MongoUserRepository implements IUserRepository {
+  // Implementation details
+}
+```
+
+### File Organization
+```
+src/
+├── controllers/
+├── services/
+├── repositories/
+├── models/
+├── middleware/
+├── routes/
+├── config/
+└── utils/
+```
+
+## Code Quality Standards
+
+### TypeScript Usage
+- Always use strict mode
+- Define interfaces for all data structures
+- Use proper generic types
+- Avoid `any` type, prefer `unknown` when necessary
+- Export types alongside implementation
+
+### Error Handling
+- Implement consistent error handling patterns
+- Use custom error classes for different error types
+- Always handle async operations with try-catch
+- Log errors appropriately with context
+
+### Code Organization
+- Single Responsibility Principle: One concern per file/function
+- DRY Principle: Extract common logic into utilities
+- Clear naming conventions: descriptive, intention-revealing names
+- Consistent file naming: kebab-case for files, PascalCase for components
+
+### Performance Considerations
+- Implement proper loading states
+- Use React.memo for expensive components
+- Optimize database queries with proper indexing
+- Implement pagination for large datasets
+- Use proper caching strategies
+
+### Testing Strategy
+- Unit tests for utilities and services
+- Component testing for UI components
+- Integration tests for API endpoints
+- Mock external dependencies appropriately
+
+## Documentation Standards
+
+### Code Documentation
+- JSDoc comments for public APIs
+- Inline comments for complex business logic
+- Type definitions serve as documentation
+- README files for setup and architecture overview
+
+### API Documentation
+- Document all endpoints with request/response examples
+- Include authentication requirements
+- Specify error response formats
+- Provide usage examples
+
+## Security Best Practices
+
+### Frontend Security
+- Sanitize user inputs
+- Implement proper authentication flows
+- Store sensitive data securely
+- Use HTTPS for all communications
+
+### Backend Security
+- Input validation on all endpoints
+- Proper authentication and authorization
+- Secure database connections
+- Rate limiting and request validation
+- Environment variable management
+
+## State Management
+
+### Frontend State
+- Use React hooks for local state
+- Implement Context API for shared state
+- Consider Redux/Zustand for complex global state
+- Separate server state from client state
+
+### Data Fetching
+- Implement proper loading and error states
+- Use consistent API service layer
+- Handle race conditions appropriately
+- Implement optimistic updates where beneficial
+
+## Database Patterns
+
+### MongoDB Best Practices
+- Design schemas based on query patterns
+- Use proper indexing strategies
+- Implement data validation at schema level
+- Handle relationships efficiently (embed vs reference)
+- Use aggregation pipelines for complex queries
+
+### Repository Implementation
+- Abstract database operations behind interfaces
+- Implement proper error handling for database operations
+- Use transactions for multi-document operations
+- Implement proper connection management
+

@@ -1,0 +1,39 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "React Frontend for MongoDB Challenge",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1",
+    "axios": "^1.6.2",
+    "styled-components": "^6.1.6",
+    "@types/react": "^18.2.42",
+    "@types/react-dom": "^18.2.17",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.0.8",
+    "@types/styled-components": "^5.1.34"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+} 
