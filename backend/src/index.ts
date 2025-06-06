@@ -18,12 +18,10 @@ import { createUserRoutes } from './routes/userRoutes';
  */
 class App {
   private app: express.Application;
-  private port: number;
+  private initialized: boolean = false;
 
   constructor() {
     this.app = express();
-    this.port = parseInt(process.env.PORT || '3001', 10);
-    
     this.initializeMiddleware();
     this.initializeErrorHandling();
   }
@@ -93,24 +91,52 @@ class App {
   }
 
   /**
-   * Connect to database and start the server
+   * Initialize the app for serverless environment
+   */
+  public async initialize(): Promise<express.Application> {
+    if (!this.initialized) {
+      try {
+        // Connect to MongoDB
+        await DatabaseConnection.getInstance().connect();
+        
+        // Initialize routes
+        this.initializeRoutes();
+        
+        this.initialized = true;
+        console.log('✅ App initialized for serverless deployment');
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+        throw error;
+      }
+    }
+    
+    return this.app;
+  }
+
+  /**
+   * Get the Express app instance
+   */
+  public getApp(): express.Application {
+    return this.app;
+  }
+
+  /**
+   * Start the server (for local development)
    */
   public async start(): Promise<void> {
+    const port = parseInt(process.env.PORT || '3001', 10);
+    
     try {
-      // Connect to MongoDB first
-      await DatabaseConnection.getInstance().connect();
-      
-      // Initialize routes
-      this.initializeRoutes();
+      await this.initialize();
       
       // Start the server
-      this.app.listen(this.port, () => {
-        console.log(`🚀 Server is running on port ${this.port}`);
-        console.log(`📱 API Base URL: http://localhost:${this.port}`);
-        console.log(`🏥 Health Check: http://localhost:${this.port}/health`);
-        console.log(`📦 Products API: http://localhost:${this.port}/api/products`);
-        console.log(`💰 Special Prices API: http://localhost:${this.port}/api/special-prices`);
-        console.log(`👥 Users API: http://localhost:${this.port}/api/users`);
+      this.app.listen(port, () => {
+        console.log(`🚀 Server is running on port ${port}`);
+        console.log(`📱 API Base URL: http://localhost:${port}`);
+        console.log(`🏥 Health Check: http://localhost:${port}/health`);
+        console.log(`📦 Products API: http://localhost:${port}/api/products`);
+        console.log(`💰 Special Prices API: http://localhost:${port}/api/special-prices`);
+        console.log(`👥 Users API: http://localhost:${port}/api/users`);
       });
     } catch (error) {
       console.error('Failed to start server:', error);
@@ -131,23 +157,40 @@ class App {
   }
 }
 
-// Handle process termination
-const app = new App();
+// Create app instance
+const appInstance = new App();
 
+// For Vercel serverless deployment
+let cachedApp: express.Application;
+
+const handler = async (req: express.Request, res: express.Response) => {
+  if (!cachedApp) {
+    cachedApp = await appInstance.initialize();
+  }
+  return cachedApp(req, res);
+};
+
+// Handle process termination (for local development)
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received');
-  await app.shutdown();
+  await appInstance.shutdown();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   console.log('SIGINT received');
-  await app.shutdown();
+  await appInstance.shutdown();
   process.exit(0);
 });
 
-// Start the application
-app.start().catch(error => {
-  console.error('Failed to start application:', error);
-  process.exit(1);
-}); 
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  appInstance.start().catch(error => {
+    console.error('Failed to start application:', error);
+    process.exit(1);
+  });
+}
+
+// Export for Vercel
+export default handler;
+module.exports = handler; 
